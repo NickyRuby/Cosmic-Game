@@ -24,6 +24,8 @@ var EARTH_2 = {x: SUN_X_POS, y: SUN_X_POS, radius: SUN_ORBIT_RAIDUS_2, rad: EART
 var EARTH_3 = {x: SUN_X_POS, y: SUN_X_POS, radius: SUN_ORBIT_RAIDUS_3, rad: EARTH_RADIUS, color: "black" }
 var MOON = {x: EARTH_1.x + SUN_ORBIT_RAIDUS_1, y:EARTH_1.y + SUN_ORBIT_RAIDUS_1, radius: EARTH_RADIUS * 3 , rad: EARTH_RADIUS / 2, color: "black" }
 
+let objects = [EARTH_1, EARTH_2, EARTH_3, MOON];
+
 
 // Preset World
 CANVAS.width = CANVAS_WIDTH;
@@ -47,6 +49,16 @@ function drawCircle(x, y, r, color, fill) {
   }
 }
 
+function calcPosition(x,y,r,t,color,fill) {
+  return {
+      color: color,
+      fill: fill,
+      x: x - r * Math.sin(t * Math.PI / 180),
+      y: y + r * Math.cos(t * Math.PI / 180)
+   }
+}
+
+
 function clearWorld() {
   CTX.clearRect(0, 0, CANVAS.width, CANVAS.height);
 }
@@ -63,30 +75,8 @@ function draw(ws) {
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_1, SUN_ORBIT_COLOR, false);
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_2, SUN_ORBIT_COLOR, false);
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_3, SUN_ORBIT_COLOR, false);
-  drawMovingBody(EARTH_1,ws);
-  drawMovingBody(EARTH_2,ws/2);
-  drawMovingBody(EARTH_3,ws/3);
-  drawSputnik(MOON,ws * 4);
+  drawCircle()
 }
-
-// doesn't work properly
-function updateXY(obj,ws) { 
-  obj.x =  obj.x //100 + obj.radius * Math.cos(ws * Math.PI / 180); // + Math.cos(ws * Math.PI / 180);
-  obj.y = obj.y // 100 + obj.radius * Math.sin(ws * Math.PI / 180); // + Math.sin(ws * Math.PI / 180);
-}
-
-function drawSputnik (sputnik,ws) {
-  updateXY(sputnik,ws);
-  drawMovingBody(sputnik,ws);
-}
-
-
-// make planets spin
-function drawMovingBody(obj,ws) { 
- drawCircle(obj.x - obj.radius * Math.cos(ws * Math.PI / 180), 
- obj.y + obj.radius * Math.sin (ws * Math.PI / 180), obj.rad, obj.color, true)
-}
-
 
 
 // WorldState -> WorldState
@@ -110,25 +100,11 @@ function forTest(){
 bigBang(0, draw, tick);
 
 
-// Сделать класс Body 
-// создаем каждый объект 
-// по тику мы апдейтим объект 
-// для вращения спутника центром орбиты берем координаты центра Земли
-
 /*
+и на всякий случай еще раз напомню с помощью каких пар-ов рассчитывается 
+положение спутника (планета это тоже спутник. только спутник солнца)
 
-  class Body {
-    constructor (x,y,r,t) {
-      this.x = r * cos(t);
-      this.y = y * sin (t);
-    }
-
-
-    //update Body according to WorldState
-    function update(t) {
-      this.x = r * cos(t)
-      this.y = r * sin(t)
-    }
-  }
-
+1) координат барицентра
+2) расстояния до желаемой орбиты
+3) времени
 */
