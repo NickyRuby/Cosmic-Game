@@ -30,6 +30,8 @@ var WorldState = {
   time: 0, 
   rocket: [[100,100], [90,125], [110, 125]]
 }
+//n = [25,20];
+
 
 
 // Preset World
@@ -94,7 +96,8 @@ function draw(ws) {
   drawCircle(newEarth3.x,newEarth3.y,newEarth3.rad,newEarth3.color,true);
   let newMoon = calcPosition(newEarth1, MOON, ws, 4);
   drawCircle(newMoon.x, newMoon.y, newMoon.rad, newMoon.color, true);
-  drawRocket()
+  drawRocket();
+  checkCollision(ws,newEarth1);
 
 }
 
@@ -104,6 +107,18 @@ function draw(ws) {
 function tick(ws) {
   ws.time += 1;
   return ws;
+}
+
+// checking collision 
+function checkCollision(ws,body){
+  let distance1 = Math.floor(Math.sqrt(Math.pow((ws.rocket[0][0] - body.x),2) + Math.pow((ws.rocket[0][1] - body.y),2))) - body.rad;
+  //let distance2 = Math.sqrt((Math.pow(ws.rocket[1][0] - body.x),2) + (Math.pow(ws.rocket[1][1] - body.y),2)) - body.rad;
+  // let distance3 = Math.sqrt((Math.pow(ws.rocket[2][0] - body.x),2) + (Math.pow(ws.rocket[2][1] - body.y),2)) - body.rad;
+  if (distance1 === 0) alert('its collision');
+  console.log(distance1);
+  //console.log(distance2);
+ // console.log(distance2);
+
 }
 
 
