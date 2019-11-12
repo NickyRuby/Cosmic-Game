@@ -97,7 +97,7 @@ function draw(ws) {
   let newMoon = calcPosition(newEarth1, MOON, ws, 4);
   drawCircle(newMoon.x, newMoon.y, newMoon.rad, newMoon.color, true);
   drawRocket();
-  checkCollision(ws,newEarth1);
+  checkCollision(ws,[newEarth1, newEarth2, newEarth3]);
 
 }
 
@@ -109,16 +109,27 @@ function tick(ws) {
   return ws;
 }
 
-// checking collision 
-function checkCollision(ws,body){
-  let distance1 = Math.floor(Math.sqrt(Math.pow((ws.rocket[0][0] - body.x),2) + Math.pow((ws.rocket[0][1] - body.y),2))) - body.rad;
-  //let distance2 = Math.sqrt((Math.pow(ws.rocket[1][0] - body.x),2) + (Math.pow(ws.rocket[1][1] - body.y),2)) - body.rad;
-  // let distance3 = Math.sqrt((Math.pow(ws.rocket[2][0] - body.x),2) + (Math.pow(ws.rocket[2][1] - body.y),2)) - body.rad;
-  if (distance1 === 0) alert('its collision');
-  console.log(distance1);
-  //console.log(distance2);
- // console.log(distance2);
+function calculateProj(vector1, vector2) {
+  const proj = Math.abs((vector1[0] * vector2[0] + vector1[1] * vector2[1]) / Math.sqrt(vector2[0] ** 2 + vector2[1] ** 2));
+  const coordinates = [proj * vector2[0] / Math.sqrt((vector2[0] ** 2 + vector2[1]) ** 2), proj * vector2[1] / Math.sqrt(vector2[0] ** 2 + vector2[1] ** 2)];
+  return coordinates;
+}
 
+// checking collision 
+function checkCollision(ws,bodies) {
+  bodies.forEach(body => {
+  console.log(body);
+  const triangleVector1 = [ws.rocket[0][0]- ws.rocket[2][0],ws.rocket[0][1] - ws.rocket[2][1]];
+  const planetVector = [body.x - ws.rocket[2][0],body.y - ws.rocket[2][1]];
+  const projCoordinates = calculateProj(planetVector,triangleVector1);
+  const distance = Math.floor(Math.sqrt((body.x - projCoordinates[0]) ** 2 + (body.y - projCoordinates[1]) ** 2) - body.rad);
+  console.log(triangleVector1 + ' : triangle');
+  console.log(planetVector + ' : projVector');
+  console.log(projCoordinates  + ' : projCoordinates');
+  console.log(distance  + ' : distance');
+  if (distance === 0) alert('its collision');
+});
+debugger;
 }
 
 
