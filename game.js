@@ -65,6 +65,13 @@ function drawRocket(){
   CTX.fill(); 
 }
 
+function drawVector(x1, y1, x2, y2) { 
+  CTX.beginPath();
+  CTX.moveTo(x1, y1);
+  CTX.lineTo(x2, y2);
+  CTX.stroke();
+}
+
 
 // f(baricenter,sputnik, WorldState, acceleration);
 function calcPosition(bar,obj,ws,acc) {
@@ -110,26 +117,33 @@ function tick(ws) {
 }
 
 function calculateProj(vector1, vector2) {
-  const proj = Math.abs((vector1[0] * vector2[0] + vector1[1] * vector2[1]) / Math.sqrt(vector2[0] ** 2 + vector2[1] ** 2));
-  const coordinates = [proj * vector2[0] / Math.sqrt((vector2[0] ** 2 + vector2[1]) ** 2), proj * vector2[1] / Math.sqrt(vector2[0] ** 2 + vector2[1] ** 2)];
+  const lengthV2 = Math.sqrt((vector2[0] ** 2 + vector2[1]) ** 2);
+  const proj = Math.abs((vector1[0] * vector2[0] + vector1[1] * vector2[1]) / lengthV2);
+  console.log('THIS IS PROJECTION: ' + proj);
+  const coordinates = [(proj * vector2[0]) / lengthV2, (proj * vector2[1]) / lengthV2 ];
+  console.log('THIS IS COORDINATES OF PROJECTION: ' + coordinates);
   return coordinates;
 }
 
 // checking collision 
 function checkCollision(ws,bodies) {
-  bodies.forEach(body => {
+  bodies.forEach((body,index) => {
   console.log(body);
-  const triangleVector1 = [ws.rocket[0][0]- ws.rocket[2][0],ws.rocket[0][1] - ws.rocket[2][1]];
-  const planetVector = [body.x - ws.rocket[2][0],body.y - ws.rocket[2][1]];
+  const triangleVector1 = [ws.rocket[2][0]- ws.rocket[0][0], ws.rocket[2][1] - ws.rocket[0][1]];
+  const planetVector = [body.x - ws.rocket[2][0], body.y - ws.rocket[2][1]];
   const projCoordinates = calculateProj(planetVector,triangleVector1);
   const distance = Math.floor(Math.sqrt((body.x - projCoordinates[0]) ** 2 + (body.y - projCoordinates[1]) ** 2) - body.rad);
+  // drawVector(ws.rocket[2][0],ws.rocket[2][1], body.x, body.y);
+  drawVector(projCoordinates[0], projCoordinates[1], body.x, body.y);
   console.log(triangleVector1 + ' : triangle');
   console.log(planetVector + ' : projVector');
   console.log(projCoordinates  + ' : projCoordinates');
   console.log(distance  + ' : distance');
-  if (distance === 0) alert('its collision');
+  console.log(`--------------------------${index}------------------------`);
+
+  if (distance === 0) alert('whoo-hoo');
 });
-debugger;
+  setTimeout(() => {debugger}, 3000);
 }
 
 
