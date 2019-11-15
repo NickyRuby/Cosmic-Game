@@ -100,9 +100,9 @@ function draw(ws) {
   drawCircle(newEarth1.x,newEarth1.y,newEarth1.rad,newEarth1.color,true);
   let newEarth2 = calcPosition(SUN, EARTH_2, ws, 2);
   drawCircle(newEarth2.x,newEarth2.y,newEarth2.rad,newEarth2.color,true);
-  let newEarth3 = calcPosition(SUN, EARTH_3, ws, 3);
+  let newEarth3 = calcPosition(SUN, EARTH_3, ws, 2);
   drawCircle(newEarth3.x,newEarth3.y,newEarth3.rad,newEarth3.color,true);
-  let newMoon = calcPosition(newEarth1, MOON, ws, 4);
+  let newMoon = calcPosition(newEarth1, MOON, ws, 2);
   drawCircle(newMoon.x, newMoon.y, newMoon.rad, newMoon.color, true);
   drawRocket();
   checkCollision(ws,[newEarth1, newEarth2, newEarth3]);
@@ -117,49 +117,32 @@ function tick(ws) {
   return ws;
 }
 
-// TODO: Find mistakes in calculations
-function calculateProj(vector1, vector2) {
-  const lengthV2 = Math.sqrt((vector2[0] ** 2 + vector2[1]) ** 2);
-  const proj = Math.abs((vector1[0] * vector2[0] + vector1[1] * vector2[1]) / lengthV2);
-  console.log('THIS IS PROJECTION: ' + proj);
-  const coordinates = [proj * vector2[0] , proj * vector2[1]];
-  console.log('THIS IS COORDINATES OF PROJECTION: ' + coordinates[0] + "," + coordinates[1]);
-  return coordinates;
-}
 
-// checking collision 
 function checkCollision(ws,bodies) {
-  bodies.forEach((body,index) => {
-
-  //chekin on start
-  console.log(body);
-  console.log(ws.rocket[2][0] + "," + ws.rocket[2][1] + "," + ws.rocket[0][0] + "," + ws.rocket[0][1]);
-  console.log((ws.rocket[2][0]-ws.rocket[0][0]) + ', ' + (ws.rocket[2][1]-ws.rocket[0][1]));
+  bodies.forEach((body) => {
 
    // making calculations
-  const triangleVector1 = [(ws.rocket[2][0] - 10) , (ws.rocket[2][1] - 25)]; // dots: A,B => C = (Bx-Ax,By-Ay)
-  const planetVector = [body.x - ws.rocket[2][0], body.y - ws.rocket[2][1]]; // 
-  const projCoordinates = calculateProj(planetVector,triangleVector1);
-  const distance = Math.floor(Math.sqrt((body.x - projCoordinates[0]) ** 2 + (body.y - projCoordinates[1]) ** 2) - body.rad);
+  const distX = ws.rocket[0][0] - ws.rocket[2][0] ;
+  const distY = ws.rocket[0][1] - ws.rocket[2][1] ;
+  const lineLength = Math.sqrt(distX ** 2 + distY ** 2);
+  const dot = (((body.x - ws.rocket[2][0]) * (ws.rocket[2][0] - ws.rocket[0][0])) + 
+  ((body.y - ws.rocket[2][1]) * (ws.rocket[2][1] - ws.rocket[0][1]))) / lineLength ** 2;
+
+  const closestX = ws.rocket[0][0] + (dot * (ws.rocket[2][0] - ws.rocket[0][0]));
+  const closestY = ws.rocket[0][1] + (dot * (ws.rocket[2][1] - ws.rocket[0][1]));
+
+  const distance = Math.floor(Math.sqrt(closestX ** 2 + closestY ** 2));
 
   // cheking by drawing vectors
   drawVector(ws.rocket[2][0],ws.rocket[2][1], body.x, body.y);
-  drawVector(projCoordinates[0], projCoordinates[1], body.x, body.y);
-  drawVector(ws.rocket[2][0],ws.rocket[2][1], ws.rocket[0][0],ws.rocket[0][1],"black");
-  drawVector(body.x, body.y, projCoordinates[0], projCoordinates[1],"red");
-  
-  // debuggin results in console
-  console.log(triangleVector1[0] + "@" + triangleVector1[1] + ' : triangle');
-  console.log(planetVector[0] + ", " +  planetVector[1] + ' : projVector');
-  console.log(projCoordinates[0] + ", " + projCoordinates[1]  + ' : projCoordinates');
-  console.log(distance  + ' : distance');
-  console.log(`--------------------------${index}------------------------`);
+  drawVector(body.x, body.y , closestX , closestY , "red");
+  drawVector(ws.rocket[2][0],ws.rocket[2][1],closestX,closestY)
 
   if (distance === 0) alert('whoo-hoo');
+  
 });
-  setTimeout(() => {debugger}, 5000);
-}
 
+}
 
 // runs simulation from given WorldState
 // WorldState, KeyStore -> WorldState
