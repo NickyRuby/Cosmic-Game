@@ -65,11 +65,12 @@ function drawRocket(){
   CTX.fill(); 
 }
 
-function drawVector(x1, y1, x2, y2) { 
+function drawVector(x1, y1, x2, y2, color) { 
   CTX.beginPath();
   CTX.moveTo(x1, y1);
   CTX.lineTo(x2, y2);
   CTX.stroke();
+  CTX.strokeStyle = color;
 }
 
 
@@ -92,9 +93,9 @@ function clearWorld() {
 function draw(ws) {
   clearWorld();
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_RADIUS, SUN_COLOR, true);
-  drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_1, SUN_ORBIT_COLOR, false);
-  drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_2, SUN_ORBIT_COLOR, false);
-  drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_3, SUN_ORBIT_COLOR, false); 
+  drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_1, SUN_ORBIT_COLOR, "blue");
+  drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_2, SUN_ORBIT_COLOR, "blue");
+  drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_3, SUN_ORBIT_COLOR, "blue"); 
   let newEarth1 = calcPosition(SUN, EARTH_1, ws, 1);
   drawCircle(newEarth1.x,newEarth1.y,newEarth1.rad,newEarth1.color,true);
   let newEarth2 = calcPosition(SUN, EARTH_2, ws, 2);
@@ -116,34 +117,47 @@ function tick(ws) {
   return ws;
 }
 
+// TODO: Find mistakes in calculations
 function calculateProj(vector1, vector2) {
   const lengthV2 = Math.sqrt((vector2[0] ** 2 + vector2[1]) ** 2);
   const proj = Math.abs((vector1[0] * vector2[0] + vector1[1] * vector2[1]) / lengthV2);
   console.log('THIS IS PROJECTION: ' + proj);
-  const coordinates = [(proj * vector2[0]) / lengthV2, (proj * vector2[1]) / lengthV2 ];
-  console.log('THIS IS COORDINATES OF PROJECTION: ' + coordinates);
+  const coordinates = [proj * vector2[0] , proj * vector2[1]];
+  console.log('THIS IS COORDINATES OF PROJECTION: ' + coordinates[0] + "," + coordinates[1]);
   return coordinates;
 }
 
 // checking collision 
 function checkCollision(ws,bodies) {
   bodies.forEach((body,index) => {
+
+  //chekin on start
   console.log(body);
-  const triangleVector1 = [ws.rocket[2][0]- ws.rocket[0][0], ws.rocket[2][1] - ws.rocket[0][1]];
-  const planetVector = [body.x - ws.rocket[2][0], body.y - ws.rocket[2][1]];
+  console.log(ws.rocket[2][0] + "," + ws.rocket[2][1] + "," + ws.rocket[0][0] + "," + ws.rocket[0][1]);
+  console.log((ws.rocket[2][0]-ws.rocket[0][0]) + ', ' + (ws.rocket[2][1]-ws.rocket[0][1]));
+
+   // making calculations
+  const triangleVector1 = [(ws.rocket[2][0] - 10) , (ws.rocket[2][1] - 25)]; // dots: A,B => C = (Bx-Ax,By-Ay)
+  const planetVector = [body.x - ws.rocket[2][0], body.y - ws.rocket[2][1]]; // 
   const projCoordinates = calculateProj(planetVector,triangleVector1);
   const distance = Math.floor(Math.sqrt((body.x - projCoordinates[0]) ** 2 + (body.y - projCoordinates[1]) ** 2) - body.rad);
-  // drawVector(ws.rocket[2][0],ws.rocket[2][1], body.x, body.y);
+
+  // cheking by drawing vectors
+  drawVector(ws.rocket[2][0],ws.rocket[2][1], body.x, body.y);
   drawVector(projCoordinates[0], projCoordinates[1], body.x, body.y);
-  console.log(triangleVector1 + ' : triangle');
-  console.log(planetVector + ' : projVector');
-  console.log(projCoordinates  + ' : projCoordinates');
+  drawVector(ws.rocket[2][0],ws.rocket[2][1], ws.rocket[0][0],ws.rocket[0][1],"black");
+  drawVector(body.x, body.y, projCoordinates[0], projCoordinates[1],"red");
+  
+  // debuggin results in console
+  console.log(triangleVector1[0] + "@" + triangleVector1[1] + ' : triangle');
+  console.log(planetVector[0] + ", " +  planetVector[1] + ' : projVector');
+  console.log(projCoordinates[0] + ", " + projCoordinates[1]  + ' : projCoordinates');
   console.log(distance  + ' : distance');
   console.log(`--------------------------${index}------------------------`);
 
   if (distance === 0) alert('whoo-hoo');
 });
-  setTimeout(() => {debugger}, 3000);
+  setTimeout(() => {debugger}, 5000);
 }
 
 
