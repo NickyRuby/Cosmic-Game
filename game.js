@@ -96,13 +96,13 @@ function draw(ws) {
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_1, SUN_ORBIT_COLOR, "blue");
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_2, SUN_ORBIT_COLOR, "blue");
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_3, SUN_ORBIT_COLOR, "blue"); 
-  let newEarth1 = calcPosition(SUN, EARTH_1, ws, 1);
+  let newEarth1 = calcPosition(SUN, EARTH_1, ws, 0.5);
   drawCircle(newEarth1.x,newEarth1.y,newEarth1.rad,newEarth1.color,true);
-  let newEarth2 = calcPosition(SUN, EARTH_2, ws, 2);
+  let newEarth2 = calcPosition(SUN, EARTH_2, ws, 0.5);
   drawCircle(newEarth2.x,newEarth2.y,newEarth2.rad,newEarth2.color,true);
-  let newEarth3 = calcPosition(SUN, EARTH_3, ws, 2);
+  let newEarth3 = calcPosition(SUN, EARTH_3, ws, 0.5);
   drawCircle(newEarth3.x,newEarth3.y,newEarth3.rad,newEarth3.color,true);
-  let newMoon = calcPosition(newEarth1, MOON, ws, 2);
+  let newMoon = calcPosition(newEarth1, MOON, ws, 0.5);
   drawCircle(newMoon.x, newMoon.y, newMoon.rad, newMoon.color, true);
   drawRocket();
   checkCollision(ws,[newEarth1, newEarth2, newEarth3]);
@@ -118,31 +118,52 @@ function tick(ws) {
 }
 
 
+function getDistance(x1,y1,x2,y2) {
+  const distX = x2 - x1;
+  const distY = y2 - y1;
+  const lineLength = Math.sqrt(distX ** 2 + distY ** 2);
+  return lineLength;
+}
+
+
 function checkCollision(ws,bodies) {
   bodies.forEach((body) => {
 
    // making calculations
-  const distX = ws.rocket[0][0] - ws.rocket[2][0] ;
-  const distY = ws.rocket[0][1] - ws.rocket[2][1] ;
-  const lineLength = Math.sqrt(distX ** 2 + distY ** 2);
+  const lineLength = getDistance(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[2][0],ws.rocket[2][1]);
   const dot = (((body.x - ws.rocket[2][0]) * (ws.rocket[2][0] - ws.rocket[0][0])) + 
   ((body.y - ws.rocket[2][1]) * (ws.rocket[2][1] - ws.rocket[0][1]))) / lineLength ** 2;
 
   const closestX = ws.rocket[0][0] + (dot * (ws.rocket[2][0] - ws.rocket[0][0]));
   const closestY = ws.rocket[0][1] + (dot * (ws.rocket[2][1] - ws.rocket[0][1]));
 
-  const distance = Math.floor(Math.sqrt(closestX ** 2 + closestY ** 2));
-
   // cheking by drawing vectors
   drawVector(ws.rocket[2][0],ws.rocket[2][1], body.x, body.y);
   drawVector(body.x, body.y , closestX , closestY , "red");
   drawVector(ws.rocket[2][0],ws.rocket[2][1],closestX,closestY)
 
-  if (distance === 0) alert('whoo-hoo');
-  
-});
+  const distance = (closestX,closestX,body.x,body.y);
+  const onVector = onSide(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[2][0],ws.rocket[2][1],closestX,closestY);
 
+  console.log(distance);
+  console.log(onVector);
+
+  if (onVector && distance - body.rad === 0) alert('whoo-hoo');
+
+});
 }
+
+// checks is projection coordinates belongs to side
+function onSide (x1,y1,x2,y2, projX, projY) {
+  const first = getDistance(x1,y1,projX,projY);
+  const second = getDistance(x2,y2,projX,projY);
+  const proj = getDistance(x1,y1,x2,y2);
+  const buffer = 0.1;
+  if ((first + second >= proj - buffer - buffer && first + second <= proj + buffer)) return true;
+  return false;
+} 
+
+
 
 // runs simulation from given WorldState
 // WorldState, KeyStore -> WorldState
