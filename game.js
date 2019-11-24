@@ -28,7 +28,8 @@ var MOON = {x: SUN.x, y:SUN.y, radius: EARTH_RADIUS * 2 , rad: EARTH_RADIUS / 3,
 //
 var WorldState = {
   time: 0, 
-  rocket: [[100,100], [90,125], [110, 125]]
+  rocket: [[100,100], [90,125], [110, 125]],
+  rocketColor: "black"
 }
 //n = [25,20];
 
@@ -57,13 +58,12 @@ function drawCircle(x, y, r, color, fill) {
 }
 
 // drawing Rocket on canvas
-function drawRocket(color){
+function drawRocket(){
   CTX.beginPath();
   CTX.moveTo(WorldState.rocket[0][0], WorldState.rocket[0][1]);
   CTX.lineTo(WorldState.rocket[1][0], WorldState.rocket[1][1]);
   CTX.lineTo(WorldState.rocket[2][0], WorldState.rocket[2][1]);
-  CTX.fillStyle = "black";
-  if (color) CTX.fillStyle = color;
+  CTX.fillStyle = WorldState.rocketColor;
   CTX.fill(); 
 }
 
@@ -98,14 +98,15 @@ function draw(ws) {
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_1, SUN_ORBIT_COLOR, "blue");
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_2, SUN_ORBIT_COLOR, "blue");
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_3, SUN_ORBIT_COLOR, "blue"); 
-  let newEarth1 = calcPosition(SUN, EARTH_1, ws, 0.015);
+  let newEarth1 = calcPosition(SUN, EARTH_1, ws, 0.5);
   drawCircle(newEarth1.x,newEarth1.y,newEarth1.rad,newEarth1.color,true);
-  let newEarth2 = calcPosition(SUN, EARTH_2, ws, 0.025);
+  let newEarth2 = calcPosition(SUN, EARTH_2, ws, 0.5);
   drawCircle(newEarth2.x,newEarth2.y,newEarth2.rad,newEarth2.color,true);
-  let newEarth3 = calcPosition(SUN, EARTH_3, ws, 0.035);
+  let newEarth3 = calcPosition(SUN, EARTH_3, ws, 0.5);
   drawCircle(newEarth3.x,newEarth3.y,newEarth3.rad,newEarth3.color,true);
-  let newMoon = calcPosition(newEarth1, MOON, ws, 0.045);
+  let newMoon = calcPosition(newEarth1, MOON, ws, 0.5);
   drawCircle(newMoon.x, newMoon.y, newMoon.rad, newMoon.color, true);
+  drawRocket();
   checkCollision(ws,[newEarth1, newEarth2,newEarth3]);
 
 }
@@ -125,10 +126,10 @@ function getDistance(x1,y1,x2,y2) {
   return Math.floor(Math.sqrt(distX ** 2 + distY ** 2));
 }
 
-
+// 
 function checkCollision(ws,bodies) {
   bodies.forEach((body) => {
-   // making calculations
+  
   const lineLength = getDistance(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[2][0],ws.rocket[2][1]);
   const dot = (((body.x - ws.rocket[2][0]) * (ws.rocket[2][0] - ws.rocket[0][0])) + 
   ((body.y - ws.rocket[2][1]) * (ws.rocket[2][1] - ws.rocket[0][1]))) / lineLength ** 2;
@@ -136,31 +137,21 @@ function checkCollision(ws,bodies) {
   const closestX = ws.rocket[2][0] + (dot * (ws.rocket[2][0] - ws.rocket[0][0]));
   const closestY = ws.rocket[2][1] + (dot * (ws.rocket[2][1] - ws.rocket[0][1]));
 
+  const distance = getDistance(closestX,closestY,body.x,body.y);
   const onVector = onSide(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[2][0],ws.rocket[2][1],closestX,closestY);
 
-  // cheking by drawing vectors
-  drawVector(ws.rocket[2][0],ws.rocket[2][1], body.x, body.y);
-  drawVector(body.x, body.y , closestX , closestY , "red");
-  drawVector(ws.rocket[2][0],ws.rocket[2][1],closestX,closestY)
-
-  const distance = getDistance(closestX,closestY,body.x,body.y);
-  
-
-  setTimeout(console.log(distance),5000);
-  if (distance < body.rad && onSide) {
-    drawRocket("red")
+  if (distance <= body.rad && onVector) { 
+    WorldState.rocketColor = "red"
     drawCircle(closestX,closestY,2,"yellow",true);
   }
   else {
-    drawRocket()  
+    WorldState.rocketColor = "black"
   }
-  
-
 
 });
 }
 
-// checks is projection coordinates belongs to side
+// checks is projection coordinates belongs to side of triangle
 function onSide (x1,y1,x2,y2, projX, projY) {
   const first = getDistance(x1,y1,projX,projY);
   const second = getDistance(x2,y2,projX,projY);
@@ -225,5 +216,3 @@ function bigBang(ws, onDraw, onTick, onKey) {
 
 
 bigBang(WorldState, draw, tick, myOnKey);
-
-
