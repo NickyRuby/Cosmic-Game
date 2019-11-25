@@ -126,9 +126,10 @@ function getDistance(x1,y1,x2,y2) {
   return Math.floor(Math.sqrt(distX ** 2 + distY ** 2));
 }
 
-// 
+// TODO: Fix problems with loop 
+// Found problem: color doesn't change because next one overrides "red changes" in previos. That's why the next one worls because it's last.
 function checkCollision(ws,bodies) {
-  bodies.forEach((body) => {
+  bodies.forEach(body => {
   
   const lineLength = getDistance(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[2][0],ws.rocket[2][1]);
   const dot = (((body.x - ws.rocket[2][0]) * (ws.rocket[2][0] - ws.rocket[0][0])) + 
@@ -141,11 +142,11 @@ function checkCollision(ws,bodies) {
   const onVector = onSide(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[2][0],ws.rocket[2][1],closestX,closestY);
 
   if (distance <= body.rad && onVector) { 
-    WorldState.rocketColor = "red"
     drawCircle(closestX,closestY,2,"yellow",true);
+    WorldState.rocketColor = "red";
   }
   else {
-    WorldState.rocketColor = "black"
+    WorldState.rocketColor = "black";
   }
 
 });
@@ -168,17 +169,18 @@ function onSide (x1,y1,x2,y2, projX, projY) {
 // computes new WorldState according keypress
 function myOnKey(ws, ks) {
   if (ks.ArrowUp ) {
-    for (let each of ws.rocket) each[1] -= 5;
+    for (let each of ws.rocket) each[1] -= 2;
   }
   else if (ks.ArrowDown) {
-    for (let each of ws.rocket) each[1] += 5;
+    for (let each of ws.rocket) each[1] += 2;
   }
   else if (ks.ArrowLeft) {
-    for (let each of ws.rocket) each[0] -= 5;
+    for (let each of ws.rocket) each[0] -= 2;
   }
   else if (ks.ArrowRight) {
-    for (let each of ws.rocket) each[0] += 5;
+    for (let each of ws.rocket) each[0] += 2;
   }
+
   return ws;
 }
 
