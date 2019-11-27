@@ -98,16 +98,16 @@ function draw(ws) {
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_1, SUN_ORBIT_COLOR, "blue");
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_2, SUN_ORBIT_COLOR, "blue");
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_ORBIT_RAIDUS_3, SUN_ORBIT_COLOR, "blue"); 
-  let newEarth1 = calcPosition(SUN, EARTH_1, ws, 0.5);
+  let newEarth1 = calcPosition(SUN, EARTH_1, ws, 1);
   drawCircle(newEarth1.x,newEarth1.y,newEarth1.rad,newEarth1.color,true);
-  let newEarth2 = calcPosition(SUN, EARTH_2, ws, 0.5);
+  let newEarth2 = calcPosition(SUN, EARTH_2, ws, 2);
   drawCircle(newEarth2.x,newEarth2.y,newEarth2.rad,newEarth2.color,true);
-  let newEarth3 = calcPosition(SUN, EARTH_3, ws, 0.5);
+  let newEarth3 = calcPosition(SUN, EARTH_3, ws, 3);
   drawCircle(newEarth3.x,newEarth3.y,newEarth3.rad,newEarth3.color,true);
-  let newMoon = calcPosition(newEarth1, MOON, ws, 0.5);
+  let newMoon = calcPosition(newEarth1, MOON, ws, 4);
   drawCircle(newMoon.x, newMoon.y, newMoon.rad, newMoon.color, true);
   drawRocket();
-  checkCollision(ws,[newEarth1, newEarth2,newEarth3]);
+  checkCollision(ws,[newEarth1, newEarth2,newEarth3, newMoon]);
 
 }
 
@@ -129,6 +129,9 @@ function getDistance(x1,y1,x2,y2) {
 // TODO: Fix problems with loop 
 // Found problem: color doesn't change because next one overrides "red changes" in previos. That's why the next one worls because it's last.
 function checkCollision(ws,bodies) {
+  let collided = false;
+  WorldState.rocketColor = "black";
+
   bodies.forEach(body => {
   
   const lineLength = getDistance(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[2][0],ws.rocket[2][1]);
@@ -141,13 +144,12 @@ function checkCollision(ws,bodies) {
   const distance = getDistance(closestX,closestY,body.x,body.y);
   const onVector = onSide(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[2][0],ws.rocket[2][1],closestX,closestY);
 
-  if (distance <= body.rad && onVector) { 
+  if (distance <= body.rad && onVector && !collided) { 
     drawCircle(closestX,closestY,2,"yellow",true);
-    WorldState.rocketColor = "red";
+    collided = true;
   }
-  else {
-    WorldState.rocketColor = "black";
-  }
+
+  if (collided) WorldState.rocketColor = "red";
 
 });
 }
@@ -169,16 +171,16 @@ function onSide (x1,y1,x2,y2, projX, projY) {
 // computes new WorldState according keypress
 function myOnKey(ws, ks) {
   if (ks.ArrowUp ) {
-    for (let each of ws.rocket) each[1] -= 2;
+    for (let each of ws.rocket) each[1] -= 5;
   }
   else if (ks.ArrowDown) {
-    for (let each of ws.rocket) each[1] += 2;
+    for (let each of ws.rocket) each[1] += 5;
   }
   else if (ks.ArrowLeft) {
-    for (let each of ws.rocket) each[0] -= 2;
+    for (let each of ws.rocket) each[0] -= 5;
   }
   else if (ks.ArrowRight) {
-    for (let each of ws.rocket) each[0] += 2;
+    for (let each of ws.rocket) each[0] += 5;
   }
 
   return ws;
