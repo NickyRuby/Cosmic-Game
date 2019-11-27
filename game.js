@@ -119,6 +119,21 @@ function tick(ws) {
   return ws;
 }
 
+function restart(result) { 
+  if (result ==='won') {
+    let submitForm = confirm('You won! Do you want to restart?');
+    if (submitForm) location.reload(true);
+    else location.replace('https://en.wiktionary.org/wiki/win');
+  }
+  else if (result === 'looser') {
+    let submitForm = confirm('You loose! Do you want to restart?');
+    if (submitForm) location.reload();
+    else location.replace('https://en.wiktionary.org/wiki/fiasco');
+  }
+
+}
+
+
 
 function getDistance(x1,y1,x2,y2) {
   const distX = x2 - x1;
@@ -126,13 +141,11 @@ function getDistance(x1,y1,x2,y2) {
   return Math.floor(Math.sqrt(distX ** 2 + distY ** 2));
 }
 
-// TODO: Fix problems with loop 
-// Found problem: color doesn't change because next one overrides "red changes" in previos. That's why the next one worls because it's last.
 function checkCollision(ws,bodies) {
   let collided = false;
   WorldState.rocketColor = "black";
 
-  bodies.forEach(body => {
+  bodies.forEach((body,index) => {
   
   const lineLength = getDistance(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[2][0],ws.rocket[2][1]);
   const dot = (((body.x - ws.rocket[2][0]) * (ws.rocket[2][0] - ws.rocket[0][0])) + 
@@ -147,9 +160,15 @@ function checkCollision(ws,bodies) {
   if (distance <= body.rad && onVector && !collided) { 
     drawCircle(closestX,closestY,2,"yellow",true);
     collided = true;
-  }
+    WorldState.rocketColor = "red";
 
-  if (collided) WorldState.rocketColor = "red";
+    if (index === 3) {
+      restart('won');
+    }
+    else {
+      restart('looser');
+    }
+  }
 
 });
 }
