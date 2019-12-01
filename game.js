@@ -131,29 +131,48 @@ function restart(result) {
 
 }
 
-let Vector20 = {
-  x: ws.rocket[2][0] - ws.rocket[0][0],
-  y: ws.rocket[2][1] - ws.rocket[0][1],
-  length: lineLength(getDistance(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[2][0],ws.rocket[2][1]))
+// let Vector20 = {
+//   x: WorldState.rocket[2][0] - WorldState.rocket[0][0],
+//   y: WorldState.rocket[2][1] - WorldState.rocket[0][1],
+//   length: lineLength(getDistance(WorldState.rocket[0][0],WorldState.rocket[0][1],WorldState.rocket[2][0],WorldState.rocket[2][1]))
+// }
+
+// let Vector01 = {
+//   x: WorldState.rocket[1][0] - WorldState.rocket[0][0],
+//   y: WorldState.rocket[1][1] - WorldState.rocket[0][1],
+//   length: lineLength(getDistance(WorldState.rocket[0][0],WorldState.rocket[0][1],WorldState.rocket[1][0],WorldState.rocket[1][1]))
+// }
+
+// let Vector21 = {
+//   x: ws.rocket[2][0] - ws.rocket[1][0],
+//   y: ws.rocket[2][1] - ws.rocket[1][1],
+//   length: lineLength(getDistance(ws.rocket[2][0],ws.rocket[2][1],ws.rocket[1][0],ws.rocket[1][1]))
+// }
+
+// function getDot(vector,body){
+//   const dot = (((body.x - vector.x) * (vector.x)) + 
+//   ((body.y - vector.y * (ws.rocket[2][1] - ws.rocket[0][1]))) / vectorlength ** 2)
+// }
+
+
+class Vector {
+  constructor(x,y) {
+    this.x = x;
+    this.y = y;
+    this.length = Math.floor(Math.sqrt(this.x ** 2 + this.y ** 2));
+  }
+
 }
 
-let Vector01 = {
-  x: ws.rocket[1][0] - ws.rocket[0][0],
-  y: ws.rocket[1][1] - ws.rocket[0][1],
-  length: lineLength(getDistance(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[1][0],ws.rocket[1][1]))
+function getDot(v1,v2) {
+  return ((v1.x * v2.x) + (v1.y + v2.y)) / v2.length;
 }
 
-let Vector21 = {
-  x: ws.rocket[2][0] - ws.rocket[1][0],
-  y: ws.rocket[2][1] - ws.rocket[1][1],
-  length: lineLength(getDistance(ws.rocket[2][0],ws.rocket[2][1],ws.rocket[1][0],ws.rocket[1][1]))
-}
+let vectorOne = new Vector(WorldState.rocket[2][0] - WorldState.rocket[0][0], WorldState.rocket[2][1] - WorldState.rocket[0][1]);
+let vectorTwo = new Vector(WorldState.rocket[1][0] - WorldState.rocket[0][0], WorldState.rocket[1][1] - WorldState.rocket[0][1]);
+let vectorThree = new Vector(WorldState.rocket[2][0] - WorldState.rocket[1][0], WorldState.rocket[2][1] - WorldState.rocket[1][1]);
 
-function getDot(vector,body){
-  const dot = (((body.x - vector.x) * (vector.x)) + 
-  ((body.y - vector.y * (ws.rocket[2][1] - ws.rocket[0][1]))) / vectorlength ** 2;
-}
-
+let triangleVectors = [vectorOne,vectorTwo,vectorThree];
 
 
 function getDistance(x1,y1,x2,y2) {
@@ -162,26 +181,31 @@ function getDistance(x1,y1,x2,y2) {
   return Math.floor(Math.sqrt(distX ** 2 + distY ** 2));
 }
 
+function getDistanceTwo(v1,v2) {
+  return Math.floor(Math.sqrt((v2.x-v1.x) ** 2 + (v2.y - v1.y) ** 2))
+}
+
 function checkCollision(ws,bodies) {
   let collided = false;
   WorldState.rocketColor = "black";
 
-  bodies.forEach((body,index) => {
+  triangleVectors.forEach(vector => {
+    bodies.forEach((body,index) => {
+
+    const bodyVector = new Vector(body.x - vector.x, body.y - vector.y);
+    const dot = getDot(bodyVector,vector);
   
-  const lineLength = getDistance(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[2][0],ws.rocket[2][1]);
-  const dot = (((body.x - ws.rocket[2][0]) * (ws.rocket[2][0] - ws.rocket[0][0])) + 
-  ((body.y - ws.rocket[2][1]) * (ws.rocket[2][1] - ws.rocket[0][1]))) / lineLength ** 2;
 
-  const closestX = ws.rocket[2][0] + (dot * (ws.rocket[2][0] - ws.rocket[0][0]));
-  const closestY = ws.rocket[2][1] + (dot * (ws.rocket[2][1] - ws.rocket[0][1]));
+    const closestX = vector.x + (dot * vector.x);
+    const closestY = vector.y + (dot * vector.y);
 
-  const distance = getDistance(closestX,closestY,body.x,body.y);
-  const onVector = onSide(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[2][0],ws.rocket[2][1],closestX,closestY);
+    const distance = getDistance(closestX,closestY,body.x,body.y);
+    const onVector = onSide(ws.rocket[0][0], ws.rocket[0][1], ws.rocket[2][0], ws.rocket[2][1], closestX, closestY);
 
-  if (distance <= body.rad && onVector && !collided) { 
-    drawCircle(closestX,closestY,2,"yellow",true);
-    collided = true;
-    WorldState.rocketColor = "red";
+    if (distance <= body.rad && onVector && !collided) { 
+      drawCircle(closestX,closestY,2,"yellow",true);
+      collided = true;
+      WorldState.rocketColor = "red";
 
     if (index === 3) {
       restart('won');
@@ -191,6 +215,7 @@ function checkCollision(ws,bodies) {
     }
   }
 
+});
 });
 }
 
@@ -203,6 +228,15 @@ function onSide (x1,y1,x2,y2, projX, projY) {
   if ((first + second >= proj - buffer && first + second <= proj + buffer)) return true;
   return false;
 } 
+
+function onSide2(v1,v2,projVector) {
+  const first = getDistance(v1,projVector);
+  const second = getDistance(v2,projVector);
+  const proj = getDistance(v1,v2);
+  const buffer = 0.1;
+  if ((first + second >= proj - buffer && first + second <= proj + buffer)) return true;
+  return false;
+}
 
 
 
@@ -260,3 +294,4 @@ function bigBang(ws, onDraw, onTick, onKey) {
 
 
 bigBang(WorldState, draw, tick, myOnKey);
+
