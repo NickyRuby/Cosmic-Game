@@ -132,6 +132,7 @@ function restart(result) {
 }
 
 
+
 function getDistance(x1,y1,x2,y2) {
   const distX = x2 - x1;
   const distY = y2 - y1;
