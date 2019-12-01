@@ -131,29 +131,6 @@ function restart(result) {
 
 }
 
-let Vector20 = {
-  x: ws.rocket[2][0] - ws.rocket[0][0],
-  y: ws.rocket[2][1] - ws.rocket[0][1],
-  length: lineLength(getDistance(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[2][0],ws.rocket[2][1]))
-}
-
-let Vector01 = {
-  x: ws.rocket[1][0] - ws.rocket[0][0],
-  y: ws.rocket[1][1] - ws.rocket[0][1],
-  length: lineLength(getDistance(ws.rocket[0][0],ws.rocket[0][1],ws.rocket[1][0],ws.rocket[1][1]))
-}
-
-let Vector21 = {
-  x: ws.rocket[2][0] - ws.rocket[1][0],
-  y: ws.rocket[2][1] - ws.rocket[1][1],
-  length: lineLength(getDistance(ws.rocket[2][0],ws.rocket[2][1],ws.rocket[1][0],ws.rocket[1][1]))
-}
-
-function getDot(vector,body){
-  const dot = (((body.x - vector.x) * (vector.x)) + 
-  ((body.y - vector.y * (ws.rocket[2][1] - ws.rocket[0][1]))) / vectorlength ** 2;
-}
-
 
 
 function getDistance(x1,y1,x2,y2) {
