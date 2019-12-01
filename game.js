@@ -161,11 +161,10 @@ class Vector {
     this.y = y;
     this.length = Math.floor(Math.sqrt(this.x ** 2 + this.y ** 2));
   }
-
 }
 
-function getDot(v1,v2) {
-  return ((v1.x * v2.x) + (v1.y + v2.y)) / v2.length;
+function getProjection(v1,v2) {
+  return (v1.x * v2.x) + (v1.y + v2.y) / v2.length;
 }
 
 let vectorOne = new Vector(WorldState.rocket[2][0] - WorldState.rocket[0][0], WorldState.rocket[2][1] - WorldState.rocket[0][1]);
@@ -181,7 +180,7 @@ function getDistance(x1,y1,x2,y2) {
   return Math.floor(Math.sqrt(distX ** 2 + distY ** 2));
 }
 
-function getDistanceTwo(v1,v2) {
+function getDistanceV2(v1,v2) {
   return Math.floor(Math.sqrt((v2.x-v1.x) ** 2 + (v2.y - v1.y) ** 2))
 }
 
@@ -193,14 +192,15 @@ function checkCollision(ws,bodies) {
     bodies.forEach((body,index) => {
 
     const bodyVector = new Vector(body.x - vector.x, body.y - vector.y);
-    const dot = getDot(bodyVector,vector);
-  
+    const dot = getProjection(bodyVector,vector);
 
-    const closestX = vector.x + (dot * vector.x);
-    const closestY = vector.y + (dot * vector.y);
+    const closestVector = new Vector(vector.x + (dot * vector.x),vector.y + (dot * vector.y));
+    // const closestX = vector.x + (dot * vector.x);
+    // const closestY = vector.y + (dot * vector.y);
 
-    const distance = getDistance(closestX,closestY,body.x,body.y);
-    const onVector = onSide(ws.rocket[0][0], ws.rocket[0][1], ws.rocket[2][0], ws.rocket[2][1], closestX, closestY);
+    const distance = getDistanceV2(closestVector,bodyVector);
+    // const onVector = onSide(ws.rocket[0][0], ws.rocket[0][1], ws.rocket[2][0], ws.rocket[2][1], closestX, closestY);
+    const onVector = onsideV2(closestVector)
 
     if (distance <= body.rad && onVector && !collided) { 
       drawCircle(closestX,closestY,2,"yellow",true);
@@ -229,7 +229,7 @@ function onSide (x1,y1,x2,y2, projX, projY) {
   return false;
 } 
 
-function onSide2(v1,v2,projVector) {
+function onSideV2(v1,v2,projVector) {
   const first = getDistance(v1,projVector);
   const second = getDistance(v2,projVector);
   const proj = getDistance(v1,v2);
