@@ -19,13 +19,14 @@ var SUN_ORBIT_RAIDUS_3 = 150;
 var SUN_ORBIT_COLOR = "#c1c1c1";
 
 // MOVING OBJECTS — x,y:center of orbit; raduis: radius of orbit; rad: planet's radius;
-var SUN = {x:SUN_X_POS, y: SUN_Y_POS, radius: 0, SUN_RADIUS, rad:SUN_RADIUS ,color: "yellow"}
-var EARTH_1 = {x: SUN.x, y: SUN.y, radius: SUN_ORBIT_RAIDUS_1, rad: EARTH_RADIUS, color: "blue" }
-var EARTH_2 = {x: SUN.x, y: SUN.y, radius: SUN_ORBIT_RAIDUS_2, rad: EARTH_RADIUS, color: "purple" }
-var EARTH_3 = {x: SUN.x, y: SUN.y, radius: SUN_ORBIT_RAIDUS_3, rad: EARTH_RADIUS, color: "red" }
-var MOON = {x: SUN.x, y:SUN.y, radius: EARTH_RADIUS * 2 , rad: EARTH_RADIUS / 3, color: "black" }
+var SUN = {name: "sun", x:SUN_X_POS, y: SUN_Y_POS, radius: 0, SUN_RADIUS, rad:SUN_RADIUS ,color: "yellow"}
+var EARTH_1 = {name: "earth1", x: SUN.x, y: SUN.y, radius: SUN_ORBIT_RAIDUS_1, rad: EARTH_RADIUS, color: "blue" }
+var EARTH_2 = {name: "earth2", x: SUN.x, y: SUN.y, radius: SUN_ORBIT_RAIDUS_2, rad: EARTH_RADIUS, color: "purple" }
+var EARTH_3 = {name: "earth3", x: SUN.x, y: SUN.y, radius: SUN_ORBIT_RAIDUS_3, rad: EARTH_RADIUS, color: "red" }
+var MOON = {name: "moon", x: SUN.x, y:SUN.y, radius: EARTH_RADIUS * 2 , rad: EARTH_RADIUS / 3, color: "black" }
 
-//
+// TODO: color is a state of rocket, not the state of Worldstate
+// TODO: state of the game 
 var WorldState = {
   time: 0, 
   rocket: [[100,100], [90,125], [110, 125]],
@@ -90,6 +91,7 @@ function clearWorld() {
 
 // WorldState -> Image
 // draws Earth on Sun orbit according to WorldState
+// TODOL logic vs render, tick -> calculations, draw -> render 
 function draw(ws) {
   clearWorld();
   drawCircle(SUN_X_POS, SUN_Y_POS, SUN_RADIUS, SUN_COLOR, true);
@@ -140,6 +142,7 @@ function getDistance(x1,y1,x2,y2) {
   return Math.floor(Math.sqrt(distX ** 2 + distY ** 2));
 }
 
+// TODO: return boolean 
 function checkCollision(ws,bodies) {
 
   let triangleVectors = [
@@ -152,31 +155,32 @@ function checkCollision(ws,bodies) {
   WorldState.rocketColor = "black";
 
   triangleVectors.forEach(vector => {
-  bodies.forEach((body,index) => {
-  const lineLength = getDistance(vector.x1,vector.y1,vector.x2,vector.y2);
-  const dot = (((body.x - vector.x1) * (vector.x1 - vector.x2)) + 
-  ((body.y - vector.y1) * (vector.y1 - vector.y2))) / lineLength ** 2;
+    
+  bodies.forEach((body) => {
+    const lineLength = getDistance(vector.x1,vector.y1,vector.x2,vector.y2);
+    const dot = (((body.x - vector.x1) * (vector.x1 - vector.x2)) + 
+    ((body.y - vector.y1) * (vector.y1 - vector.y2))) / lineLength ** 2;
 
-  const closestX = vector.x1 + (dot * (vector.x1 - vector.x2));
-  const closestY = vector.y1 + (dot * (vector.y1 - vector.y2));
+    const closestX = vector.x1 + (dot * (vector.x1 - vector.x2));
+    const closestY = vector.y1 + (dot * (vector.y1 - vector.y2));
 
-  const distance = getDistance(closestX,closestY,body.x,body.y);
-  const onVector = onSide(vector.x2,vector.y2,vector.x1,vector.y1,closestX,closestY);
+    const distance = getDistance(closestX,closestY,body.x,body.y);
+    const onVector = onSide(vector.x2,vector.y2,vector.x1,vector.y1,closestX,closestY);
 
-  if (distance <= body.rad && onVector && !collided) { 
-    drawCircle(closestX,closestY,2,"yellow",true);
-    collided = true;
-    WorldState.rocketColor = "red";
+    if (distance <= body.rad && onVector && !collided) { 
+      drawCircle(closestX,closestY,2,"yellow",true);
+      collided = true;
+      WorldState.rocketColor = "red";
 
-    if (index === 3) {
-      restart('won');
+      if (body.name === 'moon') {
+        restart('won');
+      }
+      else {
+        restart('looser');
+      }
     }
-    else {
-      restart('looser');
-    }
-  }
 
-})
+  })
 });
 }
 
